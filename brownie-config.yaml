@@ -1,0 +1,28 @@
+# change the build directory to be within react's scope
+project_structure:
+    build: client/src/artifacts
+
+      
+# automatically fetch contract sources from Etherscan
+autofetch_sources: True
+dotenv: .env
+
+
+networks:
+  default: ganache-gui  
+  kovan:
+    verify: False
+    update_interval: 60
+
+
+wallets:
+  from_key: ${PRIVATE_KEY}
+
+compiler:
+    solc:
+        optimizer:
+            enabled: true
+            runs: 200
+
+# enable output of development artifacts to load with react
+dev_deployment_artifacts: true

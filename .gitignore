@@ -1,0 +1,9 @@
+.idea/
+
+__pycache__
+.history
+.hypothesis/
+client/src/artifacts
+reports/
+
+.env

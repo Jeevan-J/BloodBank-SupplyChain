@@ -1,25 +1,8 @@
-import React, {Component} from "react";
-import {
-    BrowserRouter as Router,
-    Route,
-    Link,
-    Routes,
-  } from 'react-router-dom';
-import { Layout, Menu, Breadcrumb } from 'antd';
-
-import {getWeb3} from "./getWeb3";
-import {getEthereum} from "./getEthereum";
-
-import './App.css';
-import 'antd/dist/antd.css';
-
-import Owner from "./components/Owner";
-
-import logo from './logo.svg';
-import map from "./artifacts/deployments/map.json";
-
-
-const { Header, Content, Footer } = Layout
+import React, {Component} from "react"
+import './App.css'
+import {getWeb3} from "./getWeb3"
+import map from "./artifacts/deployments/map.json"
+import {getEthereum} from "./getEthereum"
 
 class App extends Component {
 
@@ -27,7 +10,9 @@ class App extends Component {
         web3: null,
         accounts: null,
         chainid: null,
-        bloodBankSupplyChain: null
+        solidityStorage: null,
+        solidityValue: 0,
+        solidityInput: 0,
     }
 
     componentDidMount = async () => {
@@ -36,6 +21,7 @@ class App extends Component {
         const web3 = await getWeb3()
 
         // Try and enable accounts (connect metamask)
+        const ethereum = await getEthereum()
         try {
             const ethereum = await getEthereum()
             ethereum.enable()
@@ -75,15 +61,17 @@ class App extends Component {
             _chainID = 1337
         }
         console.log(_chainID)
-        const bloodBankSupplyChain = await this.loadContract(_chainID,"BloodBankSupplyChain")
-        console.log(bloodBankSupplyChain)
-        if (!bloodBankSupplyChain) {
+        const solidityStorage = await this.loadContract(_chainID,"SolidityStorage")
+        console.log(solidityStorage)
+        if (!solidityStorage) {
             return
         }
-        const numberOfBloodSamples = await bloodBankSupplyChain.methods.fetchSampleCount().call()
-        console.log(numberOfBloodSamples)
+
+        const solidityValue = await solidityStorage.methods.get().call()
+
         this.setState({
-            bloodBankSupplyChain
+            solidityStorage,
+            solidityValue,
         })
     }
 
@@ -113,11 +101,31 @@ class App extends Component {
         }
         console.log(address)
         return new web3.eth.Contract(contractArtifact.abi, address)
+        //ethereum.request({'method'});
+        //web3.eth.Contract(contractArtifact.abi, address)
+    }
+
+
+    changeSolidity = async (e) => {
+        const {accounts, solidityStorage, solidityInput} = this.state
+        e.preventDefault()
+        const value = parseInt(solidityInput)
+        if (isNaN(value)) {
+            alert("invalid value")
+            return
+        }
+        await solidityStorage.methods.set(value).send({from: accounts[0]})
+            .on('receipt', async () => {
+                this.setState({
+                    solidityValue: await solidityStorage.methods.get().call()
+                })
+            })
     }
 
     render() {
         const {
-            web3, accounts, chainid, bloodBankSupplyChain
+            web3, accounts, chainid,
+            solidityStorage, solidityValue, solidityInput
         } = this.state
 
         if (!web3) {
@@ -129,45 +137,45 @@ class App extends Component {
             return <div>Wrong Network! Switch to your local RPC "Localhost: 8545" in your Web3 provider (e.g. Metamask)</div>
         }
 
-        if ( !bloodBankSupplyChain) {
+        if ( !solidityStorage) {
             return <div>Could not find a deployed contract. Check console for details.</div>
         }
 
         const isAccountsUnlocked = accounts ? accounts.length > 0 : false
 
-        
-        return (
-            <>
-                <Router>
-                    <Layout className="layout" style={{ minHeight: '100vh'}}>
-                        <Header>
-                            <img className="logo" src={logo}/>
-                            <Menu theme="dark" mode="horizontal" defaultSelectedKeys={['Home']} style={{float:'right'}}>
-                                <Menu.Item key="Home">
-                                    <Link to='/'>Home</Link>
-                                </Menu.Item>
-                                <Menu.Item key="CollectionCentre">
-                                    <Link to='/collectionCentre'>CollectionCentre</Link>
-                                </Menu.Item>
-                            </Menu>
-                        </Header>
-                        <Content style={{ padding: '0 50px', display: 'flex' }}>
-                            {/* <Breadcrumb style={{ margin: '16px 0' }}>
-                                <Breadcrumb.Item>Home</Breadcrumb.Item>
-                                <Breadcrumb.Item>List</Breadcrumb.Item>
-                                <Breadcrumb.Item>App</Breadcrumb.Item>
-                            </Breadcrumb> */}
-                            <div className="site-layout-content">
-                                <Routes>
-                                    <Route path='/owner' element={<Owner state={this.state}/>}></Route>
-                                </Routes>
-                            </div>
-                        </Content>
-                        <Footer style={{ textAlign: 'center', bottom: '0' }}>BloodBank SupplyChain ©2021 Created by Jeevan J</Footer>
-                    </Layout>
-                </Router>
-            </>
-        )
+        return (<div className="App">
+            <h1>Your Brownie Mix is installed and ready.</h1>
+            <p>
+                If your contracts compiled and deployed successfully, you can see the current
+                storage values below.
+            </p>
+            {
+                !isAccountsUnlocked ?
+                    <p><strong>Connect with Metamask and refresh the page to
+                        be able to edit the storage fields.</strong>
+                    </p>
+                    : null
+            }
+
+            <h2>Solidity Storage Contract</h2>
+            <div>The stored value is: {solidityValue}</div>
+            <br/>
+            <form onSubmit={(e) => this.changeSolidity(e)}>
+                <div>
+                    <label>Change the value to: </label>
+                    <br/>
+                    <input
+                        name="solidityInput"
+                        type="text"
+                        value={solidityInput}
+                        onChange={(e) => this.setState({solidityInput: e.target.value})}
+                    />
+                    <br/>
+                    <button type="submit" disabled={!isAccountsUnlocked}>Submit</button>
+
+                </div>
+            </form>
+        </div>)
     }
 }
 

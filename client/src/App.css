@@ -28,6 +28,23 @@
   color: #61dafb;
 }
 
+.site-layout-content {
+  min-height: 280px;
+  padding: 24px;
+  background: #fff;
+  height: unset;
+  width: 100%;
+}
+.logo {
+  float: left;
+  height: inherit;
+  background: rgba(255, 255, 255, 0.3);
+}
+.ant-row-rtl .logo {
+  float: right;
+  margin: 16px 0 16px 24px;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

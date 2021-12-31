@@ -323,14 +323,14 @@ contract BloodBankSupplyChain {
         collectEmptyInitialize(sample);
 
         sample.sampleState = Structure.State.SampleCollected;
-
+        
         collectSampleInitialize(
             sample,
             sampleId,
             bloodGroup,
             donorAddress
         );
-
+        sample.sampleDetails.collectedOnDate = block.timestamp;
         samples[_uid] = sample;
 
         sampleHistory[_uid].history.push(sample);
@@ -363,7 +363,7 @@ contract BloodBankSupplyChain {
         samples[_uid].testingCentre.testingCentreLocationAddress = testingCentreLocationAddress;
         samples[_uid].testingCentre.testingCentreContactDetails = testingCentreContactDetails;
         
-        sampleHistory[_uid].history.push(samples[_uid]);
+        // sampleHistory[_uid].history.push(samples[_uid]);
 
         emit SentToTestingCentre(_uid);
     }
@@ -379,6 +379,7 @@ contract BloodBankSupplyChain {
         samples[_uid].owner = msg.sender;
 
         samples[_uid].sampleState = Structure.State.RecievedByTestingCentre;
+        // sampleHistory[_uid].history.push(samples[_uid]);
 
         emit RecievedByTestingCentre(_uid);
     }
@@ -397,6 +398,7 @@ contract BloodBankSupplyChain {
         require(samples[_uid].testingCentre.testingCentre==msg.sender);
 
         samples[_uid].sampleDetails.testingRemark = testingRemark;
+        // sampleHistory[_uid].history.push(samples[_uid]);
 
         if (isAccepted) {
             emit AcceptedByTestingCentre(_uid);
@@ -428,7 +430,7 @@ contract BloodBankSupplyChain {
         samples[_uid].bloodBank.bloodBankLocationAddress = bloodBankLocationAddress;
         samples[_uid].bloodBank.bloodBankContactDetails = bloodBankContactDetails;
         
-        sampleHistory[_uid].history.push(samples[_uid]);
+        // sampleHistory[_uid].history.push(samples[_uid]);
 
         emit SentToBloodBank(_uid);
     }
@@ -444,6 +446,7 @@ contract BloodBankSupplyChain {
         samples[_uid].owner = msg.sender;
 
         samples[_uid].sampleState = Structure.State.RecievedByBloodBank;
+        // sampleHistory[_uid].history.push(samples[_uid]);
 
         emit RecievedByBloodBank(_uid);
     }
@@ -468,6 +471,7 @@ contract BloodBankSupplyChain {
         samples[_uid].hospital.hospitalContactDetails = hospitalContactDetails;
 
         samples[_uid].sampleState = Structure.State.RequestedByHospital;
+        // sampleHistory[_uid].history.push(samples[_uid]);
         emit RequestedByHospital(_uid);
     }
 
@@ -482,6 +486,7 @@ contract BloodBankSupplyChain {
     {
         require(hasBloodBankRole(msg.sender));
         samples[_uid].sampleState = Structure.State.SentToHospital;
+        // sampleHistory[_uid].history.push(samples[_uid]);
         emit SentToHospital(_uid);
     }
 
@@ -496,10 +501,10 @@ contract BloodBankSupplyChain {
         samples[_uid].owner = msg.sender;
 
         samples[_uid].sampleState = Structure.State.RecievedByHospital;
+        // sampleHistory[_uid].history.push(samples[_uid]);
 
         emit RecievedByHospital(_uid);
     }
-
 
     ///@dev Fetch Samples for Collection Centre
     function fetchSamplesForCollectionCentre(
@@ -511,12 +516,12 @@ contract BloodBankSupplyChain {
         view
         returns (
             uint256,
-            uint256,
-            address,
             address,
             string memory,
-            Structure.LocationAddress memory,
-            Structure.ContactDetails memory
+            string memory,
+            address,
+            string memory,
+            uint256
         )
     {
         require(samples[_uid].uid != 0);
@@ -529,147 +534,147 @@ contract BloodBankSupplyChain {
         }
         return (
             sample.uid,
-            sample.sku,
             sample.owner,
+            sample.sampleDetails.sampleId,
+            sample.sampleDetails.bloodGroup,
             sample.collectionCentre.collectionCentre,
             sample.collectionCentre.collectionCentreName,
-            sample.collectionCentre.collectionCentreLocationAddress,
-            sample.collectionCentre.collectionCentreContactDetails
+            sample.sampleDetails.collectedOnDate
         );
     }
 
-    ///@dev Fetch Sample for Sample Details
-    function fetchSamplesForTestingCentre(
-        uint256 _uid,
-        string memory _type,
-        uint256 i
-    )
-        public
-        view
-        returns (
-            uint256,
-            uint256,
-            address,
-            string memory,
-            string memory,
-            string memory,
-            uint256,
-            address
-        )
-    {
-        require(samples[_uid].uid != 0);
-        Structure.Sample storage sample = samples[_uid];
-        if (keccak256(bytes(_type)) == keccak256(bytes("sample"))) {
-            sample = samples[_uid];
-        }
-        if (keccak256(bytes(_type)) == keccak256(bytes("history"))) {
-            sample = sampleHistory[_uid].history[i];
-        }
-        return (
-            sample.uid,
-            sample.sku,
-            sample.owner,
-            sample.sampleDetails.sampleId,
-            sample.sampleDetails.bloodGroup,
-            sample.sampleDetails.testingRemark,
-            sample.sampleDetails.collectedOnDate,
-            sample.sampleDetails.donorAddress
-        );
-    }
+    // ///@dev Fetch Sample for Sample Details
+    // function fetchSamplesForTestingCentre(
+    //     uint256 _uid,
+    //     string memory _type,
+    //     uint256 i
+    // )
+    //     public
+    //     view
+    //     returns (
+    //         uint256,
+    //         uint256,
+    //         address,
+    //         string memory,
+    //         string memory,
+    //         string memory,
+    //         uint256,
+    //         address
+    //     )
+    // {
+    //     require(samples[_uid].uid != 0);
+    //     Structure.Sample storage sample = samples[_uid];
+    //     if (keccak256(bytes(_type)) == keccak256(bytes("sample"))) {
+    //         sample = samples[_uid];
+    //     }
+    //     if (keccak256(bytes(_type)) == keccak256(bytes("history"))) {
+    //         sample = sampleHistory[_uid].history[i];
+    //     }
+    //     return (
+    //         sample.uid,
+    //         sample.sku,
+    //         sample.owner,
+    //         sample.sampleDetails.sampleId,
+    //         sample.sampleDetails.bloodGroup,
+    //         sample.sampleDetails.testingRemark,
+    //         sample.sampleDetails.collectedOnDate,
+    //         sample.sampleDetails.donorAddress
+    //     );
+    // }
 
-    ///@dev Fetch Sample for Blood Bank
-    function fetchSamplesForBloodBank(
-        uint256 _uid,
-        string memory _type,
-        uint256 i
-    )
-        public
-        view
-        returns (
-            uint256,
-            uint256,
-            address,
-            string memory,
-            string memory,
-            string memory,
-            uint256,
-            string memory
-        )
-    {
-        require(samples[_uid].uid != 0);
-        Structure.Sample storage sample = samples[_uid];
-        if (keccak256(bytes(_type)) == keccak256(bytes("sample"))) {
-            sample = samples[_uid];
-        }
-        if (keccak256(bytes(_type)) == keccak256(bytes("history"))) {
-            sample = sampleHistory[_uid].history[i];
-        }
-        return (
-            sample.uid,
-            sample.sku,
-            sample.owner,
-            sample.sampleDetails.sampleId,
-            sample.sampleDetails.bloodGroup,
-            sample.sampleDetails.testingRemark,
-            sample.sampleDetails.collectedOnDate,
-            sample.bloodBank.bloodBankName
-        );
-    }
+    // ///@dev Fetch Sample for Blood Bank
+    // function fetchSamplesForBloodBank(
+    //     uint256 _uid,
+    //     string memory _type,
+    //     uint256 i
+    // )
+    //     public
+    //     view
+    //     returns (
+    //         uint256,
+    //         uint256,
+    //         address,
+    //         string memory,
+    //         string memory,
+    //         string memory,
+    //         uint256,
+    //         string memory
+    //     )
+    // {
+    //     require(samples[_uid].uid != 0);
+    //     Structure.Sample storage sample = samples[_uid];
+    //     if (keccak256(bytes(_type)) == keccak256(bytes("sample"))) {
+    //         sample = samples[_uid];
+    //     }
+    //     if (keccak256(bytes(_type)) == keccak256(bytes("history"))) {
+    //         sample = sampleHistory[_uid].history[i];
+    //     }
+    //     return (
+    //         sample.uid,
+    //         sample.sku,
+    //         sample.owner,
+    //         sample.sampleDetails.sampleId,
+    //         sample.sampleDetails.bloodGroup,
+    //         sample.sampleDetails.testingRemark,
+    //         sample.sampleDetails.collectedOnDate,
+    //         sample.bloodBank.bloodBankName
+    //     );
+    // }
 
-    ///@dev Fetch Sample for Hospital
-    function fetchSamplesForHospital(
-        uint256 _uid,
-        string memory _type,
-        uint256 i
-    )
-        public
-        view
-        returns (
-            uint256,
-            uint256,
-            address,
-            string memory,
-            string memory,
-            string memory,
-            uint256,
-            string memory,
-            Structure.LocationAddress memory,
-            Structure.ContactDetails memory
-        )
-    {
-        require(samples[_uid].uid != 0);
-        Structure.Sample storage sample = samples[_uid];
-        if (keccak256(bytes(_type)) == keccak256(bytes("sample"))) {
-            sample = samples[_uid];
-        }
-        if (keccak256(bytes(_type)) == keccak256(bytes("history"))) {
-            sample = sampleHistory[_uid].history[i];
-        }
-        return (
-            sample.uid,
-            sample.sku,
-            sample.owner,
-            sample.sampleDetails.sampleId,
-            sample.sampleDetails.bloodGroup,
-            sample.sampleDetails.testingRemark,
-            sample.sampleDetails.collectedOnDate,
-            sample.bloodBank.bloodBankName,
-            sample.bloodBank.bloodBankLocationAddress,
-            sample.bloodBank.bloodBankContactDetails
-        );
-    }
+    // ///@dev Fetch Sample for Hospital
+    // function fetchSamplesForHospital(
+    //     uint256 _uid,
+    //     string memory _type,
+    //     uint256 i
+    // )
+    //     public
+    //     view
+    //     returns (
+    //         uint256,
+    //         uint256,
+    //         address,
+    //         string memory,
+    //         string memory,
+    //         string memory,
+    //         uint256,
+    //         string memory,
+    //         Structure.LocationAddress memory,
+    //         Structure.ContactDetails memory
+    //     )
+    // {
+    //     require(samples[_uid].uid != 0);
+    //     Structure.Sample storage sample = samples[_uid];
+    //     if (keccak256(bytes(_type)) == keccak256(bytes("sample"))) {
+    //         sample = samples[_uid];
+    //     }
+    //     if (keccak256(bytes(_type)) == keccak256(bytes("history"))) {
+    //         sample = sampleHistory[_uid].history[i];
+    //     }
+    //     return (
+    //         sample.uid,
+    //         sample.sku,
+    //         sample.owner,
+    //         sample.sampleDetails.sampleId,
+    //         sample.sampleDetails.bloodGroup,
+    //         sample.sampleDetails.testingRemark,
+    //         sample.sampleDetails.collectedOnDate,
+    //         sample.bloodBank.bloodBankName,
+    //         sample.bloodBank.bloodBankLocationAddress,
+    //         sample.bloodBank.bloodBankContactDetails
+    //     );
+    // }
 
     function fetchSampleCount() public view returns (uint256) {
         return uid;
     }
 
-    function fetchSampleHistoryLength(uint256 _uid)
-        public 
-        view
-        returns (uint256)
-    {
-        return sampleHistory[_uid].history.length;
-    }
+    // function fetchSampleHistoryLength(uint256 _uid)
+    //     public 
+    //     view
+    //     returns (uint256)
+    // {
+    //     return sampleHistory[_uid].history.length;
+    // }
 
     function fetchSampleState(uint256 _uid)
         public

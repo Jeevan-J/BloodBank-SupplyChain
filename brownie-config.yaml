@@ -9,7 +9,7 @@ dotenv: .env
 
 
 networks:
-  default: ganache-gui  
+  default: kovan  
   kovan:
     verify: False
     update_interval: 60

@@ -39,7 +39,7 @@ library Structure {
         string line1;
         string line2;
         string city;
-        uint16 pincode;
+        uint32 pincode;
         string state;
         string country;
         string latitude;

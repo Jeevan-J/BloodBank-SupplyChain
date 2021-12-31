@@ -14,6 +14,8 @@ import './App.css';
 import 'antd/dist/antd.css';
 
 import Owner from "./components/Owner";
+import CollectionCentre from "./components/CollectionCentre/CollectionCentre";
+import Explorer from "./components/Explorer";
 
 import logo from './logo.svg';
 import map from "./artifacts/deployments/map.json";
@@ -160,6 +162,7 @@ class App extends Component {
                             <div className="site-layout-content">
                                 <Routes>
                                     <Route path='/owner' element={<Owner state={this.state}/>}></Route>
+                                    <Route path='/collectionCentre' element={<CollectionCentre state={this.state}/>}></Route>
                                 </Routes>
                             </div>
                         </Content>
